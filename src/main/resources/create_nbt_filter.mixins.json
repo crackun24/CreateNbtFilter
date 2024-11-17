@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "mcsls.xyz.create_nbt_filter.mixins",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "create_nbt_filter.refmap.json",
+  "mixins": [
+    "handlerFinishUploadMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
