@@ -1,6 +1,8 @@
 package mcsls.xyz.create_nbt_filter;
 
+import com.mojang.datafixers.types.templates.Check;
 import com.mojang.logging.LogUtils;
+import mcsls.xyz.create_nbt_filter.events.BluePrintUploadEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -22,8 +24,10 @@ public class Create_nbt_filter {
 
         // 添加监听器
         modEventBus.addListener(this::commonSetup);
+
         //注册模组
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(new CheckBlueprint());//注册监听器
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
