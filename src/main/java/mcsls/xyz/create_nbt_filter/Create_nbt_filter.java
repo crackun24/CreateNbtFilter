@@ -1,8 +1,6 @@
 package mcsls.xyz.create_nbt_filter;
 
-import com.mojang.datafixers.types.templates.Check;
 import com.mojang.logging.LogUtils;
-import mcsls.xyz.create_nbt_filter.events.BluePrintUploadEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -12,16 +10,26 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
-// The value here should match an entry in the META-INF/mods.toml file
+import java.io.FileNotFoundException;
+
 @Mod(Create_nbt_filter.MODID)
 public class Create_nbt_filter {
-
     public static final String MODID = "create_nbt_filter";
     private static final Logger LOGGER = LogUtils.getLogger();
+    private Filter filter;//NBT 标签过滤器
 
     public Create_nbt_filter() {
-        MinecraftForge.EVENT_BUS.register(new CheckBlueprint());//注册蓝图上传事件的监听器
+        filter = new Filter();//创建一个新的过滤器
+        try {
+            filter.LoadAllRulesFromFiles();//加载规则文件
+        } catch (FileNotFoundException e) {
+            LOGGER.info(Msg.ANSI_RED + "加载规则文件失败");
+            e.printStackTrace();
+        }
+
+        MinecraftForge.EVENT_BUS.register(new CheckBlueprint(filter));//注册蓝图上传事件的监听器
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
         // 添加监听器
         modEventBus.addListener(this::commonSetup);
 
@@ -33,6 +41,6 @@ public class Create_nbt_filter {
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {//服务器启动事件
-        LOGGER.info(Msg.ANSI_GREEN + "The Create NBT filter is loaded" + Msg.ANSI_RESET);
+        LOGGER.info(Msg.ANSI_GREEN + "机械动力蓝图过滤附属加载完毕" + Msg.ANSI_RESET);
     }
 }

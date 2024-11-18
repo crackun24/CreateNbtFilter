@@ -1,15 +1,10 @@
 package mcsls.xyz.create_nbt_filter.mixins;
 
 import com.simibubi.create.AllBlocks;
-import com.simibubi.create.AllItems;
 import com.simibubi.create.Create;
-import com.simibubi.create.content.schematics.SchematicItem;
 import com.simibubi.create.content.schematics.table.SchematicTableBlockEntity;
-import mcsls.xyz.create_nbt_filter.NBTChecker;
 import mcsls.xyz.create_nbt_filter.events.BluePrintUploadEvent;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -33,7 +28,6 @@ public abstract class handlerFinishUploadMixin {
 
     @Inject(method = "handleFinishedUpload", at = @At("HEAD"), cancellable = true, remap = false)
     public void OnSchematicOnLoaded(ServerPlayer player, String schematic, CallbackInfo ci) {
-        player.sendSystemMessage(Component.literal("§a正在检查蓝图文件是否合法..."));
 
         String playerSchematicId = player.getGameProfile()
                 .getName() + "/" + schematic;
@@ -58,18 +52,8 @@ public abstract class handlerFinishUploadMixin {
                     return;
                 table.finishUpload();
 
-                BluePrintUploadEvent uploadEvent = new BluePrintUploadEvent(player, "test");
-                MinecraftForge.EVENT_BUS.post(uploadEvent);
-
-                if (NBTChecker.CheckBluePrint(playerSchematicId)) {
-                    table.inventory.setStackInSlot(1, SchematicItem.create(world.holderLookup(Registries.BLOCK), schematic, player.getGameProfile()
-                            .getName()));//生成对应的蓝图
-                    player.sendSystemMessage(Component.literal("§a蓝图校验成功"));
-
-                } else {
-                    table.inventory.setStackInSlot(0, AllItems.EMPTY_SCHEMATIC.asStack());//生成空白的蓝图
-                    player.sendSystemMessage(Component.literal("§c蓝图含有非法内容"));
-                }
+                BluePrintUploadEvent uploadEvent = new BluePrintUploadEvent(player, playerSchematicId, world, table);//构建一个事件
+                MinecraftForge.EVENT_BUS.post(uploadEvent);//触发蓝图上传完成的事件
 
                 ci.cancel();
             } catch (Exception e) {
