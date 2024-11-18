@@ -20,14 +20,12 @@ public class Create_nbt_filter {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public Create_nbt_filter() {
+        MinecraftForge.EVENT_BUS.register(new CheckBlueprint());//注册蓝图上传事件的监听器
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-
         // 添加监听器
         modEventBus.addListener(this::commonSetup);
 
-        //注册模组
         MinecraftForge.EVENT_BUS.register(this);
-        MinecraftForge.EVENT_BUS.register(new CheckBlueprint());//注册监听器
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

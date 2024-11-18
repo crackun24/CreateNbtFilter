@@ -6,12 +6,14 @@ import com.simibubi.create.Create;
 import com.simibubi.create.content.schematics.SchematicItem;
 import com.simibubi.create.content.schematics.table.SchematicTableBlockEntity;
 import mcsls.xyz.create_nbt_filter.NBTChecker;
+import mcsls.xyz.create_nbt_filter.events.BluePrintUploadEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -55,13 +57,16 @@ public abstract class handlerFinishUploadMixin {
                 if (table == null)
                     return;
                 table.finishUpload();
-                if(NBTChecker.CheckBluePrint(playerSchematicId))
-                {
+
+                BluePrintUploadEvent uploadEvent = new BluePrintUploadEvent(player, "test");
+                MinecraftForge.EVENT_BUS.post(uploadEvent);
+
+                if (NBTChecker.CheckBluePrint(playerSchematicId)) {
                     table.inventory.setStackInSlot(1, SchematicItem.create(world.holderLookup(Registries.BLOCK), schematic, player.getGameProfile()
                             .getName()));//生成对应的蓝图
                     player.sendSystemMessage(Component.literal("§a蓝图校验成功"));
 
-                }else{
+                } else {
                     table.inventory.setStackInSlot(0, AllItems.EMPTY_SCHEMATIC.asStack());//生成空白的蓝图
                     player.sendSystemMessage(Component.literal("§c蓝图含有非法内容"));
                 }
