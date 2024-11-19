@@ -6,7 +6,6 @@ import mcsls.xyz.create_nbt_filter.types.Rule;
 import mcsls.xyz.create_nbt_filter.types.RuleJson;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtUtils;
 import org.slf4j.Logger;
 
 import java.io.*;
@@ -27,25 +26,33 @@ public class Filter {//过滤器
         }
     }
 
+    private Boolean verifyNBTData(CompoundTag nbt_data)//校验 NBT 数据
+    {
+        for (Rule rule : rules)//遍历规则列表
+        {
+            if (rule.IsBlueprintMatch(nbt_data))//校验蓝图是否匹配规则
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public Boolean VerifyBlueprint(String blueprintId)//校验蓝图
     {
         String nbt_file_path = BLUEPRINT_FOLDER_PATH + blueprintId;
-        File nbt_file = new File(nbt_file_path);//构造蓝图的 NBT 文件的路径
 
+        File nbt_file = new File(nbt_file_path);//构造蓝图的 NBT 文件的路径
         try {
             FileInputStream in = new FileInputStream(nbt_file);
-            CompoundTag nbt_data = NbtIo.readCompressed(in);
+            CompoundTag nbt_data = NbtIo.readCompressed(in);//读取 NBT 数据
 
-            if (nbt_data.contains("DataVersion")) {
-                LOGGER.info("data version" + nbt_data.getInt("DataVersion"));
-            }
+            return verifyNBTData(nbt_data);//返回 NBT 的校验结果
         } catch (IOException e) {
             LOGGER.info(Msg.ANSI_RED + "无法解析蓝图文件: " + nbt_file_path + Msg.ANSI_RESET);
             e.printStackTrace();
             return false;
         }
-
-        return false;
     }
 
     public void LoadAllRulesFromFiles() throws FileNotFoundException//从文件中加载所有的规则

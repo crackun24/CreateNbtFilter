@@ -52,7 +52,7 @@ public abstract class handlerFinishUploadMixin {
                     return;
                 table.finishUpload();
 
-                BluePrintUploadEvent uploadEvent = new BluePrintUploadEvent(player, playerSchematicId, world, table);//构建一个事件
+                BluePrintUploadEvent uploadEvent = new BluePrintUploadEvent(player, playerSchematicId,schematic, world, table);//构建一个事件
                 MinecraftForge.EVENT_BUS.post(uploadEvent);//触发蓝图上传完成的事件
 
                 ci.cancel();
