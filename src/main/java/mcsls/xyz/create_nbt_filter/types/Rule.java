@@ -34,44 +34,45 @@ public class Rule {//规则
     private String value2;//规则的值2 无论是什么类型,统一转换为 String 进行比较
     private String value1;//规则的值1 无论是什么类型,统一转换为 String 进行比较
 
-
-    private Boolean containKey1(CompoundTag nbt_data)//判断是否包含键1的值
+    //searching_index: 正在搜索的节点
+    //target_val: 目标的值
+    private Boolean containTarget(int search_index, String target_val, CompoundTag data)//判断是否包含着这个元素
     {
-        CompoundTag temp = nbt_data;
-        for (int i = 0; i < key1.size(); i++)//遍历所有的键
+        LOGGER.info("test");//TODO test
+        String search_key = key1.get(search_index);
+        LOGGER.info(Msg.ANSI_BLUE + "正在检测键: " + search_key + "索引: " + Integer.toString(search_index) + Msg.ANSI_RESET);//TODO test
+
+        if (data.get(search_key) instanceof ListTag)//判断是否为数组
         {
-            String key = key1.get(i);//获取当前遍历的键
-            LOGGER.info(Msg.ANSI_BLUE + key + Msg.ANSI_RESET);//TODO test
-
-            if (!key.contains(key))//判断是否含有当前的键
+            LOGGER.info(Msg.ANSI_BLUE + "搜索数组: " + search_key + Msg.ANSI_RESET);//TODO test
+            for (Tag tag : (ListTag) data.get(search_key))//遍历数组里面的所有的内容
             {
-                return false;
-            }
-
-            if (nbt_data.get(key) instanceof ListTag)//判断是否为数组
-            {
-                String next_key = key1.get(i + 1);//获取下一个元素
-                temp = getNBTObjInArray(nbt_data.getList(key, ListTag.TAG_COMPOUND), next_key);//获取数组中包含该键的元素的对象
-                if (temp == null)//数组中不存在
-                {
-                    return false;
-                } else {
-                    i += 1;//数组中的元素被找到了,跳过下一个键
+                //递归搜索数组里面的每一个元素
+                CompoundTag data_in_list = (CompoundTag) tag;
+                if (containTarget(search_index + 1, target_val, data_in_list)) {
+                    return true;//直接返回 true
                 }
-            } else {
-                temp = temp.getCompound(key);//获取下一层级的数据
             }
+        } else if ((key1.size() - 1) <= (search_index)) {//判断是否已经到了最后一个元素了
+            String value = data.getString(key1.get(search_index));//获取值的内容
+            LOGGER.info(Msg.ANSI_BLUE + "目标键的路径1的值为:" + value + Msg.ANSI_RESET);//TODO test
+            return value.equals(target_val);//判断目标的标签的值是不是和目标值相同
+        } else if (data.contains(search_key))//判断是否包含当前的标签
+        {
+            search_index += 1;//索引加一
+            LOGGER.info(Msg.ANSI_BLUE + "包含体:目前检测键: " + search_key + "索引: " + Integer.toString(search_index) + Msg.ANSI_RESET);//TODO test
+            data = data.getCompound(search_key);//获取下一个元素的数据
+            containTarget(search_index, target_val, data);//继续递归进行判断
+        } else {
+            LOGGER.info(Msg.ANSI_BLUE + "不含有键: " + search_key + Msg.ANSI_RESET);//TODO test
         }
-        return true;
+
+        return false;
     }
 
     public Boolean IsBlueprintMatch(CompoundTag nbt_data)//判断蓝图数据是否匹配规则
     {
-        if (!containKey1(nbt_data))//判断是否包含键1
-        {
-            return false;
-        }
-        return true;
+        return containTarget(0, value1, nbt_data);
     }
 
     public Rule(String _name, RuleType _type, JudgeType _judgeType, String _key1, String _key2, String _value1, String _value2)//构造函数
