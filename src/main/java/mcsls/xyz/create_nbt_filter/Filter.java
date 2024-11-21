@@ -30,7 +30,7 @@ public class Filter {//过滤器
     {
         for (Rule rule : rules)//遍历规则列表
         {
-            if (rule.IsBlueprintMatch(nbt_data))//校验蓝图是否匹配规则
+            if (rule.IsBlueprintMatch(nbt_data))//校验蓝图是否匹配规则 (如果匹配规则话就是说明含有了非法内容)
             {
                 return false;
             }
@@ -46,7 +46,6 @@ public class Filter {//过滤器
         try {
             FileInputStream in = new FileInputStream(nbt_file);
             CompoundTag nbt_data = NbtIo.readCompressed(in);//读取 NBT 数据
-
             return verifyNBTData(nbt_data);//返回 NBT 的校验结果
         } catch (IOException e) {
             LOGGER.info(Msg.ANSI_RED + "无法解析蓝图文件: " + nbt_file_path + Msg.ANSI_RESET);
