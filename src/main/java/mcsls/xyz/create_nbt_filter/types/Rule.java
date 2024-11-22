@@ -1,6 +1,7 @@
 package mcsls.xyz.create_nbt_filter.types;
 
 import com.mojang.logging.LogUtils;
+import mcsls.xyz.create_nbt_filter.FilterUtil;
 import mcsls.xyz.create_nbt_filter.Msg;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -11,8 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 
 enum RuleType {
-    CONTAIN,//如果包含了指定的数据,这个蓝图则为非法的蓝图
-    NOT_CONTAIN,//如果没有包含指定的数据,这个蓝图就是合法的蓝图
+    CONTAIN,//如果包含了指定的键,这个蓝图则为非法的蓝图
+    NOT_CONTAIN,//如果没有包含指定的键,这个蓝图就是合法的蓝图
     EQUAL, //NBT 标签下的路径必须和 Rule Value 相等
     NOT_EQUAL //NBT 标签下的路径必须和 Rule Value 不相等
 }
@@ -31,8 +32,8 @@ public class Rule {//规则
     private List<String> key1;//规则的键1 无论是什么类型,统一转换为 String 进行比较
     private List<String> key2;//规则的键2 无论是什么类型,统一转换为 String 进行比较
 
-    private String value2;//规则的值2 无论是什么类型,统一转换为 String 进行比较
-    private String value1;//规则的值1 无论是什么类型,统一转换为 String 进行比较
+    private List<String> value2;//规则的值2 无论是什么类型,统一转换为 String 进行比较
+    private List<String> value1;//规则的值1 无论是什么类型,统一转换为 String 进行比较
 
     private boolean containKey(int search_index, CompoundTag data, List<String> nodes_list) {
         String search_key = nodes_list.get(search_index);
@@ -67,7 +68,7 @@ public class Rule {//规则
     //searching_index: 正在搜索的节点
     //target_val: 目标的值
     //is_judge_value_mode 判断是否还需要去判断这个值是否和和规则一样
-    private boolean isValueMatch(int search_index, String target_val, CompoundTag data, List<String> nodes_list)//判断是否包含着这个元素
+    private boolean isValueMatch(int search_index, List<String> target_val, CompoundTag data, List<String> nodes_list)//判断是否包含着这个元素
     {
         String search_key = nodes_list.get(search_index);
 //        LOGGER.info(Msg.ANSI_BLUE + "正在检测键: " + search_key + "索引: " + Integer.toString(search_index) + Msg.ANSI_RESET);//TODO test
@@ -87,10 +88,10 @@ public class Rule {//规则
         } else if ((nodes_list.size() - 1) <= (search_index)) {//判断是否已经到了最后一个元素了
             String value = data.getString(nodes_list.get(search_index));//获取值的内容
 //            LOGGER.info(Msg.ANSI_BLUE + "目标键的路径1的值为:" + value + Msg.ANSI_RESET);//TODO test
-            if (value.equals(target_val)) {
-                LOGGER.info(Msg.ANSI_BLUE + "第一个键的值与期望值相同" + Msg.ANSI_RESET);
-            }
-            return value.equals(target_val);//判断目标的标签的值是不是和目标值相同
+//            if (FilterUtil.IsStringListContainTarget(target_val, value)) {
+//                LOGGER.info(Msg.ANSI_BLUE + "第一个键的值与期望值相同" + Msg.ANSI_RESET);
+//            }
+            return FilterUtil.IsStringListContainTarget(target_val, value);//判断目标的标签的值是不是和目标值相同
         } else if (data.contains(search_key))//判断是否包含当前的标签
         {
             search_index += 1;//索引加一
@@ -150,12 +151,11 @@ public class Rule {//规则
     public boolean IsBlueprintMatch(CompoundTag nbt_data)//判断蓝图数据是否匹配规则
     {
         try {
-            if (isJudgeTypeMatch(nbt_data)) {
+            if (isJudgeTypeMatch(nbt_data)) {//TODO test
                 LOGGER.info(Msg.ANSI_GREEN + "蓝图判断匹配" + Msg.ANSI_RESET);
             }
 
-            if (isRuleTypeMatch(nbt_data)) {
-
+            if (isRuleTypeMatch(nbt_data)) {//TODO test
                 LOGGER.info(Msg.ANSI_GREEN + "蓝图过滤规则匹配" + Msg.ANSI_RESET);
             }
             return (isJudgeTypeMatch(nbt_data) && isRuleTypeMatch(nbt_data));//判断是否满足第一个判断条件和第二个判断条件
@@ -166,7 +166,7 @@ public class Rule {//规则
         }
     }
 
-    public Rule(String _name, RuleType _type, JudgeType _judgeType, String _key1, String _key2, String _value1, String _value2)//构造函数
+    public Rule(String _name, RuleType _type, JudgeType _judgeType, String _key1, String _key2, List<String> _value1, List<String> _value2)//构造函数
     {
         type = _type;//设置过滤的类型
         judgeType = _judgeType;//设置判断的类型
