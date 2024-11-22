@@ -11,10 +11,10 @@ import java.util.Arrays;
 import java.util.List;
 
 enum RuleType {
-    MUST_CONTAIN,//必须包含 NBT 标签 (对应的路径下面必须要包含 Rule Value2 里面的 NBT 标签)
-    CAN_NOT_CONTAIN,//禁止包含的 BNT 标签 (对应的路径下面禁止包含的 Rule Value2 里面的 NBT 标签)
-    MUST_EQUAL, //NBT 标签下的路径必须和 Rule Value 相等
-    CAN_NOT_EQUAL //NBT 标签下的路径必须和 Rule Value 不相等
+    CONTAIN,//如果包含了指定的数据,这个蓝图则为非法的蓝图
+    NOT_CONTAIN,//如果没有包含指定的数据,这个蓝图就是合法的蓝图
+    EQUAL, //NBT 标签下的路径必须和 Rule Value 相等
+    NOT_EQUAL //NBT 标签下的路径必须和 Rule Value 不相等
 }
 
 enum JudgeType {//判断模式
@@ -34,32 +34,13 @@ public class Rule {//规则
     private String value2;//规则的值2 无论是什么类型,统一转换为 String 进行比较
     private String value1;//规则的值1 无论是什么类型,统一转换为 String 进行比较
 
-    private boolean isValue2Match(String current_data, String target_data) throws Exception//判断值是否匹配目标的规则
-    {
-        switch (type) {
-
-            case MUST_EQUAL: {//值必须和目标的值相同
-                return (current_data.equals(target_data));//直接返回这两个数值是否相等
-            }
-
-            case CAN_NOT_EQUAL://值不可以和目标的值相同
-            {
-                return !(current_data.equals(target_data));
-            }
-
-            default: {
-                throw new Exception("Error type.");
-            }
-        }
-    }
-
     private boolean containKey(int search_index, CompoundTag data, List<String> nodes_list) {
         String search_key = nodes_list.get(search_index);
-        LOGGER.debug(Msg.ANSI_BLUE + "正在检测键: " + search_key + "索引: " + Integer.toString(search_index) + Msg.ANSI_RESET);//TODO test
+//        LOGGER.debug(Msg.ANSI_BLUE + "正在检测键: " + search_key + "索引: " + Integer.toString(search_index) + Msg.ANSI_RESET);//TODO test
 
         if (data.get(search_key) instanceof ListTag)//判断是否为数组
         {
-            LOGGER.debug(Msg.ANSI_BLUE + "搜索数组: " + search_key + Msg.ANSI_RESET);//TODO test
+//            LOGGER.debug(Msg.ANSI_BLUE + "搜索数组: " + search_key + Msg.ANSI_RESET);//TODO test
             for (Tag tag : (ListTag) data.get(search_key))//遍历数组里面的所有的内容
             {
                 //递归搜索数组里面的每一个元素
@@ -74,11 +55,11 @@ public class Rule {//规则
         } else if (data.contains(search_key))//判断是否包含当前的标签
         {
             search_index += 1;//索引加一
-            LOGGER.debug(Msg.ANSI_BLUE + "包含体:目前检测键: " + search_key + "索引: " + Integer.toString(search_index) + Msg.ANSI_RESET);//TODO test
+//            LOGGER.debug(Msg.ANSI_BLUE + "包含体:目前检测键: " + search_key + "索引: " + Integer.toString(search_index) + Msg.ANSI_RESET);//TODO test
             data = data.getCompound(search_key);//获取下一个元素的数据
             return containKey(search_index, data, nodes_list);//继续递归进行判断
         } else {
-            LOGGER.debug(Msg.ANSI_BLUE + "不含有键: " + search_key + Msg.ANSI_RESET);//TODO test
+//            LOGGER.debug(Msg.ANSI_BLUE + "不含有键: " + search_key + Msg.ANSI_RESET);//TODO test
             return false;
         }
     }
@@ -89,11 +70,11 @@ public class Rule {//规则
     private boolean isValueMatch(int search_index, String target_val, CompoundTag data, List<String> nodes_list)//判断是否包含着这个元素
     {
         String search_key = nodes_list.get(search_index);
-        LOGGER.debug(Msg.ANSI_BLUE + "正在检测键: " + search_key + "索引: " + Integer.toString(search_index) + Msg.ANSI_RESET);//TODO test
+//        LOGGER.info(Msg.ANSI_BLUE + "正在检测键: " + search_key + "索引: " + Integer.toString(search_index) + Msg.ANSI_RESET);//TODO test
 
         if (data.get(search_key) instanceof ListTag)//判断是否为数组
         {
-            LOGGER.debug(Msg.ANSI_BLUE + "搜索数组: " + search_key + Msg.ANSI_RESET);//TODO test
+//            LOGGER.info(Msg.ANSI_BLUE + "搜索数组: " + search_key + Msg.ANSI_RESET);//TODO test
             for (Tag tag : (ListTag) data.get(search_key))//遍历数组里面的所有的内容
             {
                 //递归搜索数组里面的每一个元素
@@ -104,20 +85,20 @@ public class Rule {//规则
             }
             return false;//如果数组里面没有包含的话就返回 false
         } else if ((nodes_list.size() - 1) <= (search_index)) {//判断是否已经到了最后一个元素了
-            String value = data.getString(key1.get(search_index));//获取值的内容
-            LOGGER.debug(Msg.ANSI_BLUE + "目标键的路径1的值为:" + value + Msg.ANSI_RESET);//TODO test
+            String value = data.getString(nodes_list.get(search_index));//获取值的内容
+//            LOGGER.info(Msg.ANSI_BLUE + "目标键的路径1的值为:" + value + Msg.ANSI_RESET);//TODO test
             if (value.equals(target_val)) {
-                LOGGER.debug(Msg.ANSI_BLUE + "第一个键的值与期望值相同" + Msg.ANSI_RESET);
+                LOGGER.info(Msg.ANSI_BLUE + "第一个键的值与期望值相同" + Msg.ANSI_RESET);
             }
             return value.equals(target_val);//判断目标的标签的值是不是和目标值相同
         } else if (data.contains(search_key))//判断是否包含当前的标签
         {
             search_index += 1;//索引加一
-            LOGGER.debug(Msg.ANSI_BLUE + "包含体:目前检测键: " + search_key + "索引: " + Integer.toString(search_index) + Msg.ANSI_RESET);//TODO test
+//            LOGGER.info(Msg.ANSI_BLUE + "包含体:目前检测键: " + search_key + "索引: " + Integer.toString(search_index) + Msg.ANSI_RESET);//TODO test
             data = data.getCompound(search_key);//获取下一个元素的数据
             return isValueMatch(search_index, target_val, data, nodes_list);//继续递归进行判断
         } else {
-            LOGGER.debug(Msg.ANSI_BLUE + "不含有键: " + search_key + Msg.ANSI_RESET);//TODO test
+//            LOGGER.info(Msg.ANSI_BLUE + "不含有键: " + search_key + Msg.ANSI_RESET);//TODO test
             return false;
         }
     }
@@ -145,16 +126,19 @@ public class Rule {//规则
     private boolean isRuleTypeMatch(CompoundTag nbt_data) throws Exception//判断规则是否匹配
     {
         switch (type) {//判断类型
-            case MUST_EQUAL: {//值必须和目标的值相同
+
+            case EQUAL: {//如果值和目标的值相同的话,就证明含有非法内容, 如果不相同的话,就证明不含有非法内容
                 return isValueMatch(0, value2, nbt_data, key2);
             }
-            case CAN_NOT_EQUAL: {//值不可以和目标的值相同
+
+            case NOT_EQUAL: {//如果值和目标的值不相同的话,就有非法内容,如果值和目标相同的话就不含有非法内容
                 return !(isValueMatch(0, value2, nbt_data, key2));
             }
-            case MUST_CONTAIN: {//可以包含目标的NBT标签
+
+            case CONTAIN: {//如果包含的话,就是证明有非法内容
                 return containKey(0, nbt_data, key2);
             }
-            case CAN_NOT_CONTAIN: {//不可以包含目标的NBT标签
+            case NOT_CONTAIN: {//如果没有包含的话,就证明不含有非法内容
                 return !(containKey(0, nbt_data, key2));
             }
             default: {
@@ -166,6 +150,14 @@ public class Rule {//规则
     public boolean IsBlueprintMatch(CompoundTag nbt_data)//判断蓝图数据是否匹配规则
     {
         try {
+            if (isJudgeTypeMatch(nbt_data)) {
+                LOGGER.info(Msg.ANSI_GREEN + "蓝图判断匹配" + Msg.ANSI_RESET);
+            }
+
+            if (isRuleTypeMatch(nbt_data)) {
+
+                LOGGER.info(Msg.ANSI_GREEN + "蓝图过滤规则匹配" + Msg.ANSI_RESET);
+            }
             return (isJudgeTypeMatch(nbt_data) && isRuleTypeMatch(nbt_data));//判断是否满足第一个判断条件和第二个判断条件
         } catch (Exception e) {
             e.printStackTrace();

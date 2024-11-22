@@ -3,13 +3,19 @@
 - 如果一个路径存在于数组后面,直接写数组的名字即可
 - 如果一个NBT数据匹配了第一个判断规则(key1 value1)并且和第二个规则(key2 value2)匹配的话就为非法的蓝图
 
-
 规则的判断类型
+
 ~~~
-    MUST_CONTAIN,//必须包含 NBT 标签 (对应的路径下面必须要包含 Rule Value2 里面的 NBT 标签)
-    CAN_NOT_INCLUDE,//禁止包含的 BNT 标签 (对应的路径下面禁止包含的 Rule Value2 里面的 NBT 标签)
-    MUST_EQUAL, //NBT 标签下的路径必须和 Rule Value 相等
-    CAN_NOT_EQUAL //NBT 标签下的路径必须和 Rule Value 不相等
+    CONTAIN,//如果包含了指定的数据,这个蓝图则为非法的蓝图
+    NOT_CONTAIN,//如果没有包含指定的数据,这个蓝图就是合法的蓝图
+    EQUAL, //NBT 标签下的路径必须和 Rule Value 相等
+    NOT_EQUAL //NBT 标签下的路径必须和 Rule Value 不相等
+~~~
+
+例子
+~~~
+    1 + 1 EQUAL 3 : 如果 1 + 1 等于3就是非法内容
+    1 + 1 NOT_EQUAL 2: 如果1 + 1 不等于2就是非法内容
 ~~~
 
 规则的判断模式
