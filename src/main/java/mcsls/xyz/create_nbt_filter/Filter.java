@@ -16,7 +16,7 @@ public class Filter {//过滤器
     private static final Logger LOGGER = LogUtils.getLogger();//获取日志记录器
     private List<Rule> rules;//规则的列表
     private final String RULE_FOLDER_PATH = "./config/createNbtRule";
-    private final String BLUEPRINT_FOLDER_PATH = "./schematics/uploaded/";//蓝图文件加的路径
+    private final String BLUEPRINT_FOLDER_PATH = "./schematics/uploaded/";//蓝图文件夹的路径
 
     private void createFilterFolderIfNotExist()//如果规则文件夹不存在,创建一个规则的文件夹
     {
@@ -64,6 +64,10 @@ public class Filter {//过滤器
         {
             for (File file : files)//遍历所有的规则的文件
             {
+                if (file.isDirectory())//判断是否为文件夹
+                {
+                    continue;
+                }
                 Gson gson = new Gson();// json 解析对象
                 FileReader reader = new FileReader(file);
                 RuleJson rule_data = gson.fromJson(reader, RuleJson.class);//反序列化 json 信息

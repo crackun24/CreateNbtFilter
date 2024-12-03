@@ -23,7 +23,7 @@ public class Create_nbt_filter {
         try {
             filter.LoadAllRulesFromFiles();//加载规则文件
         } catch (FileNotFoundException e) {
-            LOGGER.info(Msg.ANSI_RED + "加载规则文件失败");
+            LOGGER.info(Msg.ANSI_RED + "加载规则文件失败" + Msg.ANSI_RESET);
             e.printStackTrace();
         }
 

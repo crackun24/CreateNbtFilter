@@ -36,12 +36,17 @@ public class Rule {//规则
     private List<String> value1;//规则的值1 无论是什么类型,统一转换为 String 进行比较
 
     private boolean containKey(int search_index, CompoundTag data, List<String> nodes_list) {
-        String search_key = nodes_list.get(search_index);
-//        LOGGER.debug(Msg.ANSI_BLUE + "正在检测键: " + search_key + "索引: " + Integer.toString(search_index) + Msg.ANSI_RESET);//TODO test
+//        LOGGER.info(Msg.ANSI_RED + "当前的索引:" + Integer.toString((search_index)) + Msg.ANSI_RESET);//FIXME test delete
 
+        String search_key = nodes_list.get(search_index);
+//        LOGGER.info(Msg.ANSI_RED + "正在检测键: " + search_key + "索引: " + search_index + Msg.ANSI_RESET);//TODO test
+
+        if ((nodes_list.size() - 1) <= (search_index)) {//判断是否已经到了最后一个元素了
+            return true;//如果是最后的一个元素的话,直接返回
+        }
         if (data.get(search_key) instanceof ListTag)//判断是否为数组
         {
-//            LOGGER.debug(Msg.ANSI_BLUE + "搜索数组: " + search_key + Msg.ANSI_RESET);//TODO test
+//            LOGGER.info(Msg.ANSI_RED + "搜索数组: " + search_key + Msg.ANSI_RESET);//TODO test
             for (Tag tag : (ListTag) data.get(search_key))//遍历数组里面的所有的内容
             {
                 //递归搜索数组里面的每一个元素
@@ -51,16 +56,14 @@ public class Rule {//规则
                 }
             }
             return false;//如果数组里面没有包含的话就返回 false
-        } else if ((nodes_list.size() - 1) <= (search_index)) {//判断是否已经到了最后一个元素了
-            return true;//如果是最后的一个元素的话,直接返回
         } else if (data.contains(search_key))//判断是否包含当前的标签
         {
             search_index += 1;//索引加一
-//            LOGGER.debug(Msg.ANSI_BLUE + "包含体:目前检测键: " + search_key + "索引: " + Integer.toString(search_index) + Msg.ANSI_RESET);//TODO test
+//            LOGGER.info(Msg.ANSI_RED + "包含体:目前检测键: " + search_key + "索引: " + Integer.toString(search_index) + Msg.ANSI_RESET);//TODO test
             data = data.getCompound(search_key);//获取下一个元素的数据
             return containKey(search_index, data, nodes_list);//继续递归进行判断
         } else {
-//            LOGGER.debug(Msg.ANSI_BLUE + "不含有键: " + search_key + Msg.ANSI_RESET);//TODO test
+//            LOGGER.info(Msg.ANSI_RED + "不含有键: " + search_key + Msg.ANSI_RESET);//TODO test
             return false;
         }
     }
@@ -88,9 +91,9 @@ public class Rule {//规则
         } else if ((nodes_list.size() - 1) <= (search_index)) {//判断是否已经到了最后一个元素了
             String value = data.getString(nodes_list.get(search_index));//获取值的内容
 //            LOGGER.info(Msg.ANSI_BLUE + "目标键的路径1的值为:" + value + Msg.ANSI_RESET);//TODO test
-//            if (FilterUtil.IsStringListContainTarget(target_val, value)) {
+            if (FilterUtil.IsStringListContainTarget(target_val, value)) {
 //                LOGGER.info(Msg.ANSI_BLUE + "第一个键的值与期望值相同" + Msg.ANSI_RESET);
-//            }
+            }
             return FilterUtil.IsStringListContainTarget(target_val, value);//判断目标的标签的值是不是和目标值相同
         } else if (data.contains(search_key))//判断是否包含当前的标签
         {
@@ -152,17 +155,17 @@ public class Rule {//规则
     {
         try {
             if (isJudgeTypeMatch(nbt_data)) {//TODO test
-                LOGGER.info(Msg.ANSI_GREEN + "蓝图判断匹配" + Msg.ANSI_RESET);
+//                LOGGER.info(Msg.ANSI_GREEN + "蓝图判断匹配" + Msg.ANSI_RESET);
             }
 
             if (isRuleTypeMatch(nbt_data)) {//TODO test
-                LOGGER.info(Msg.ANSI_GREEN + "蓝图过滤规则匹配" + Msg.ANSI_RESET);
+//                LOGGER.info(Msg.ANSI_GREEN + "蓝图过滤规则匹配" + Msg.ANSI_RESET);
             }
             return (isJudgeTypeMatch(nbt_data) && isRuleTypeMatch(nbt_data));//判断是否满足第一个判断条件和第二个判断条件
         } catch (Exception e) {
             e.printStackTrace();
             LOGGER.info(Msg.ANSI_RED + "无法校验蓝图" + Msg.ANSI_RESET);
-            return false;
+            return true;//无法校验的时候禁止上传蓝图
         }
     }
 
