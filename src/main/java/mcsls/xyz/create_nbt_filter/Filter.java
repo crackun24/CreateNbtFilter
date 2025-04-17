@@ -46,6 +46,7 @@ public class Filter {//过滤器
         try {
             FileInputStream in = new FileInputStream(nbt_file);
             CompoundTag nbt_data = NbtIo.readCompressed(in);//读取 NBT 数据
+
             return verifyNBTData(nbt_data);//返回 NBT 的校验结果
         } catch (IOException e) {
             LOGGER.info(Msg.ANSI_RED + "无法解析蓝图文件: " + nbt_file_path + Msg.ANSI_RESET);
@@ -76,6 +77,34 @@ public class Filter {//过滤器
                 rules.add(rule_data.ToRule());//添加进规则列表中
             }
         }
+    }
+
+    public void FullScan() {//扫描用户上传的所有的文件
+        File bluePrintFolder = new File(BLUEPRINT_FOLDER_PATH);
+        long startTime = System.currentTimeMillis();
+
+        File[] bluePrintFolderList = bluePrintFolder.listFiles();
+        if (bluePrintFolderList == null) {//判断这个文件夹是否为空
+            return;
+        }
+
+        for (File file : bluePrintFolderList) {//遍历这个文件夹下面的所有的文件
+            LOGGER.info("正在扫描 " + file.getName() + " 玩家的蓝图文件.");
+
+            File[] playerFileList = file.listFiles();
+            if (playerFileList == null)//判断玩家的蓝图文件是否为空
+            {
+                continue;
+            }
+
+            for (File playerFile : playerFileList) {//遍历这个玩家上传的所有的文件
+                if (!VerifyBlueprint(file.getName() + "/" + playerFile.getName())) {//判断用户文件校验是否成功
+                    LOGGER.info(Msg.ANSI_RED + "玩家 " + file.getName() + " 上传了异常蓝图: " + playerFile.getName() + Msg.ANSI_RESET);
+                }
+            }
+        }
+
+        LOGGER.info("扫描完成,用时: " + (System.currentTimeMillis() - startTime) + " ms");
     }
 
     public Filter()//构造函数

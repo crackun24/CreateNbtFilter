@@ -92,7 +92,7 @@ public class Rule {//规则
             String value = data.getString(nodes_list.get(search_index));//获取值的内容
 //            LOGGER.info(Msg.ANSI_BLUE + "目标键的路径1的值为:" + value + Msg.ANSI_RESET);//TODO test
             if (FilterUtil.IsStringListContainTarget(target_val, value)) {
-//                LOGGER.info(Msg.ANSI_BLUE + "第一个键的值与期望值相同" + Msg.ANSI_RESET);
+//                LOGGER.info(Msg.ANSI_BLUE + "第一个键的值与期望值相同" + Msg.ANSI_RESET);//TODO test
             }
             return FilterUtil.IsStringListContainTarget(target_val, value);//判断目标的标签的值是不是和目标值相同
         } else if (data.contains(search_key))//判断是否包含当前的标签

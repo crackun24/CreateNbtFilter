@@ -1,7 +1,9 @@
 package mcsls.xyz.create_nbt_filter;
 
 import com.mojang.logging.LogUtils;
+import mcsls.xyz.create_nbt_filter.commands.ScanAllUpload;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -28,6 +30,8 @@ public class Create_nbt_filter {
         }
 
         MinecraftForge.EVENT_BUS.register(new CheckBlueprint(filter));//注册蓝图上传事件的监听器
+        MinecraftForge.EVENT_BUS.addListener(this::onRegCommand);//注册指令注册的事件
+
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         // 添加监听器
@@ -37,6 +41,11 @@ public class Create_nbt_filter {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
+    }
+
+    public void onRegCommand(RegisterCommandsEvent event) {
+        ScanAllUpload scanAllUploadCmd = new ScanAllUpload();
+        scanAllUploadCmd.register(filter,event.getDispatcher());
     }
 
     @SubscribeEvent
