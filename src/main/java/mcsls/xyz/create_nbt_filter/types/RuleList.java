@@ -1,8 +1,8 @@
 package mcsls.xyz.create_nbt_filter.types;
-
 import java.util.List;
 
-public class RuleJson {//解析 json 规则的信息储存类
+public class RuleList {//解析 yaml 规则的信息储存类
+    public double version;//规则的版本
     public String name;//规则的名字
     public String judge;//判断的方式
     public String type;//使用的规则

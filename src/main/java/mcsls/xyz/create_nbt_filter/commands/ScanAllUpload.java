@@ -18,11 +18,14 @@ public class ScanAllUpload {
 
         dispatcher.register(Commands.literal("fullscan").executes(
                         commandContext -> {
-
-                            new Thread(() -> {
-                                filter.FullScan();//异步执行扫描
-                            }).start();
-                            commandContext.getSource().sendSystemMessage(Component.literal("请到控制台查看执行结果"));
+                            if (commandContext.getSource().hasPermission(4)) {//判断是否有权限执行
+                                new Thread(() -> {
+                                    filter.FullScan();//异步执行扫描
+                                }).start();
+                                commandContext.getSource().sendSystemMessage(Component.literal("请到控制台查看执行结果"));
+                            } else {
+                                commandContext.getSource().sendSystemMessage(Component.literal("权限不足"));
+                            }
 
                             return Command.SINGLE_SUCCESS;
                         }

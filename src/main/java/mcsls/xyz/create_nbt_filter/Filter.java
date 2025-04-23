@@ -1,21 +1,25 @@
 package mcsls.xyz.create_nbt_filter;
 
-import com.google.gson.Gson;
 import com.mojang.logging.LogUtils;
+import mcsls.xyz.create_nbt_filter.model.OriginalRuleList;
+import mcsls.xyz.create_nbt_filter.network.RuleUpdater;
 import mcsls.xyz.create_nbt_filter.types.Rule;
-import mcsls.xyz.create_nbt_filter.types.RuleJson;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import org.slf4j.Logger;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Filter {//过滤器
     private static final Logger LOGGER = LogUtils.getLogger();//获取日志记录器
     private List<Rule> rules;//规则的列表
+    private OriginalRuleList originalRuleList;//原始的文件的信息
     private final String RULE_FOLDER_PATH = "./config/createNbtRule";
+    private final String RULE_FILE_PATH = "./config/createNbtRule/rule.yml";//规则文件的路径
     private final String BLUEPRINT_FOLDER_PATH = "./schematics/uploaded/";//蓝图文件夹的路径
 
     private void createFilterFolderIfNotExist()//如果规则文件夹不存在,创建一个规则的文件夹
@@ -23,6 +27,17 @@ public class Filter {//过滤器
         File folder = new File(RULE_FOLDER_PATH);
         if (!folder.exists()) {
             folder.mkdirs();//文件夹不存在的话就创建一个新的文件夹
+        }
+    }
+
+    private void createRuleIfNotExist() throws IOException {//如果规则文件不存在就创建从服务器获取规则文件
+        File ruleFIle = new File(RULE_FILE_PATH);
+
+        if (!ruleFIle.exists()) { //判断规则文件是否存在
+            String data = RuleUpdater.FetchRuleFile();//获取最新的配置文件信息
+
+            LOGGER.info(data);//TODO test
+            Files.writeString(ruleFIle.toPath(), data);//将配置文件的信息写出到配置文件中
         }
     }
 
@@ -55,28 +70,34 @@ public class Filter {//过滤器
         }
     }
 
-    public void LoadAllRulesFromFiles() throws FileNotFoundException//从文件中加载所有的规则
+    public void CheckUpdate() throws IOException {//检查文件的版本是否更新了
+        String latestVer = RuleUpdater.FetchRuleFile();//获取最新的文件的版本的信息
+        if (!latestVer.equals(originalRuleList.getVersion()))//判断当前的规则的文件信息是否是最新的
+        {
+            LOGGER.info("检测到有更新的规则文件,正在更新中...");
+
+            File file = new File(RULE_FILE_PATH);
+            file.delete();//删除旧的文件
+            createRuleIfNotExist();            //重新从服务器获取最新的文件的信息
+
+            LOGGER.info("规则文件更新成功");
+        }
+    }
+
+    public void LoadAllRulesFromFile() throws IOException//从文件中加载所有的规则
     {
         createFilterFolderIfNotExist();//检测规则文件夹是否存在
-        File folder = new File(RULE_FOLDER_PATH);//规则的文件夹
-        File[] files = folder.listFiles();//获取所有的文件
+        createRuleIfNotExist();
 
-        if (files != null)//判断获取到的文件列表是否为空
-        {
-            for (File file : files)//遍历所有的规则的文件
-            {
-                if (file.isDirectory())//判断是否为文件夹
-                {
-                    continue;
-                }
-                Gson gson = new Gson();// json 解析对象
-                FileReader reader = new FileReader(file);
-                RuleJson rule_data = gson.fromJson(reader, RuleJson.class);//反序列化 json 信息
+        File ruleFile = new File(RULE_FILE_PATH);
 
-                LOGGER.info("添加规则: " + Msg.ANSI_GREEN + rule_data.name + Msg.ANSI_RESET + " 进入规则表中.");
-                rules.add(rule_data.ToRule());//添加进规则列表中
-            }
-        }
+        Yaml yaml = new Yaml();
+        InputStream in = Files.newInputStream(ruleFile.toPath());
+        originalRuleList = yaml.load(in);//读取 yaml 文件
+
+        LOGGER.info("已加载规则文件,版本: " + originalRuleList.getVersion());
+
+//        CheckUpdate();//检查配置文件的更新
     }
 
     public void FullScan() {//扫描用户上传的所有的文件

@@ -20,7 +20,8 @@ enum RuleType {
 
 enum JudgeType {//判断模式
     IF_CONTAIN,//如果包含了值1的路径
-    IF_NOT_CONTAIN//如果没有包含值1的路径
+    IF_NOT_CONTAIN,//如果没有包含值1的路径
+    RANGE//值1的范围
 }
 
 public class Rule {//规则
@@ -34,6 +35,7 @@ public class Rule {//规则
 
     private List<String> value2;//规则的值2 无论是什么类型,统一转换为 String 进行比较
     private List<String> value1;//规则的值1 无论是什么类型,统一转换为 String 进行比较
+
 
     private boolean containKey(int search_index, CompoundTag data, List<String> nodes_list) {
 //        LOGGER.info(Msg.ANSI_RED + "当前的索引:" + Integer.toString((search_index)) + Msg.ANSI_RESET);//FIXME test delete

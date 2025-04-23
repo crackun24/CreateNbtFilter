@@ -12,7 +12,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
-import java.io.FileNotFoundException;
 
 @Mod(Create_nbt_filter.MODID)
 public class Create_nbt_filter {
@@ -21,11 +20,13 @@ public class Create_nbt_filter {
     private Filter filter;//NBT 标签过滤器
 
     public Create_nbt_filter() {
+
         filter = new Filter();//创建一个新的过滤器
+
         try {
-            filter.LoadAllRulesFromFiles();//加载规则文件
-        } catch (FileNotFoundException e) {
-            LOGGER.info(Msg.ANSI_RED + "加载规则文件失败" + Msg.ANSI_RESET);
+            filter.LoadAllRulesFromFile();//加载规则文件
+        } catch (Exception e) {
+            LOGGER.info(Msg.ANSI_RED + "加载规则文件失败,没有任何规则被加载" + Msg.ANSI_RESET);
             e.printStackTrace();
         }
 
@@ -45,7 +46,7 @@ public class Create_nbt_filter {
 
     public void onRegCommand(RegisterCommandsEvent event) {
         ScanAllUpload scanAllUploadCmd = new ScanAllUpload();
-        scanAllUploadCmd.register(filter,event.getDispatcher());
+        scanAllUploadCmd.register(filter, event.getDispatcher());
     }
 
     @SubscribeEvent
