@@ -8,6 +8,14 @@ import java.net.URL;
 import java.util.List;
 
 public class FilterUtil {
+    public static boolean IsValueNotInRange(List<Integer> list, int target)//TODO 判断一个值是不是不在范围里面
+    {
+        if (target < list.get(0) || target > list.get(1)) {
+            return true;
+        }
+        return false;
+    }
+
     public static boolean IsStringListContainTarget(List<String> list, String target)//TODO 判断一个字符串数组里面是否包含字符串
     {
         for (String temp : list) {

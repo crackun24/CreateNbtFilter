@@ -7,7 +7,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 
-import java.io.FileNotFoundException;
 
 //扫描所有上传的蓝图的指令
 public class ScanAllUpload {

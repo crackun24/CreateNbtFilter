@@ -150,8 +150,14 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'org.yaml:snakeyaml:2.2'
-    shadow 'org.yaml:snakeyaml:2.2'
+
+    // Jackson YAML
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.0"
+
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.17.0"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:2.17.0"
+
+    shadow "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.0"
 
     implementation fg.deobf("com.simibubi.create:create-${create_minecraft_version}:${create_version}:slim") { transitive = false }
     implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
@@ -211,6 +217,7 @@ tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.Shadow
     archiveClassifier.set('') // 生成的jar不带-all后缀
     configurations = [project.configurations.shadow]  // 只打shadow的依赖
     zip64 = true
+    finalizedBy 'reobfShadowJar'          //Shadow 完成后立刻 reobfuscate
 }
 
 tasks.named('jar', Jar).configure {
