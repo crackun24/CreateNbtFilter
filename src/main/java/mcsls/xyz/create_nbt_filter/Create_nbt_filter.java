@@ -5,7 +5,9 @@ import mcsls.xyz.create_nbt_filter.commands.ScanAllUpload;
 import mcsls.xyz.create_nbt_filter.network.RuleUpdater;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.server.ServerLifecycleEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -17,11 +19,16 @@ import org.slf4j.Logger;
 @Mod(Create_nbt_filter.MODID)
 public class Create_nbt_filter {
     public static final String MODID = "create_nbt_filter";
+
+    private Feedback feedback;//反馈对象
     private RuleUpdater ruleUpdater;//规则文件更新对象
     private static final Logger LOGGER = LogUtils.getLogger();
     private Filter filter;//NBT 标签过滤器
 
     public Create_nbt_filter() {
+        feedback = new Feedback(MODID);
+        feedback.start();//启动反馈服务
+
         filter = new Filter();//创建一个新的过滤器
         ruleUpdater = new RuleUpdater(filter);//规则更新对象
 
@@ -41,6 +48,7 @@ public class Create_nbt_filter {
         modEventBus.addListener(this::commonSetup);
 
         MinecraftForge.EVENT_BUS.register(this);
+
         ruleUpdater.start();//启动规则更新线程
     }
 
@@ -55,5 +63,10 @@ public class Create_nbt_filter {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {//服务器启动事件
         LOGGER.info(Msg.ANSI_GREEN + "机械动力蓝图过滤附属加载完毕" + Msg.ANSI_RESET);
+    }
+
+    @SubscribeEvent
+    public void onServerClose(ServerStoppedEvent event) {
+        feedback.close();//关闭反馈服务
     }
 }
