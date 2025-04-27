@@ -20,7 +20,7 @@ import java.util.Map;
 
 @Mixin(ServerSchematicLoader.class)
 public abstract class handlerFinishUploadMixin {
-    @Shadow
+@Shadow
     private Map<String, ServerSchematicLoader.SchematicUploadEntry> activeUploads;
 
     @Shadow

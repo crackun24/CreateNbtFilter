@@ -1,6 +1,7 @@
 package mcsls.xyz.create_nbt_filter.network;
 
 import com.google.gson.Gson;
+import mcsls.xyz.create_nbt_filter.Filter;
 import mcsls.xyz.create_nbt_filter.FilterUtil;
 import mcsls.xyz.create_nbt_filter.Msg;
 import mcsls.xyz.create_nbt_filter.model.FetchRuleResp;
@@ -8,8 +9,10 @@ import mcsls.xyz.create_nbt_filter.model.FetchVersionResp;
 
 import java.io.IOException;
 
-public class RuleUpdater {//规则文件的更新器
+import static net.minecraft.core.RegistryAccess.LOGGER;
 
+public class RuleUpdater extends Thread {//规则文件的更新器
+    private Filter filter;
     public static String API_ROOT = "https://api.mcsls.xyz";//接口的根地址
 
     public static String FetchVersion() throws IOException {//获取配置文件的版本信息
@@ -37,5 +40,22 @@ public class RuleUpdater {//规则文件的更新器
         }
 
         return resp.data;
+    }
+
+    public RuleUpdater(Filter filter) {//构造函数
+        this.filter = filter;
+    }
+
+    @Override
+    public void run() {//启动规则文件更新线程
+        while (true) {
+            try {
+                sleep(43200000);
+                filter.CheckUpdate();//检查更新
+            } catch (Exception e) {
+                LOGGER.info(Msg.ANSI_RED + "无法获取规则文件信息,稍后将会自动重试" + Msg.ANSI_RESET);
+                e.printStackTrace();
+            }
+        }
     }
 }

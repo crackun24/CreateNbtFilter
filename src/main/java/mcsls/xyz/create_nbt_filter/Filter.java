@@ -16,6 +16,9 @@ import org.slf4j.Logger;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,8 +32,16 @@ public class Filter {//过滤器
 
     private final String RULE_FOLDER_PATH = "./config/createNbtRule";
     private final String RULE_FILE_PATH = "./config/createNbtRule/rule.yml";//规则文件的路径
-    private final String BLUEPRINT_FOLDER_PATH = "./schematics/uploaded/";//蓝图文件夹的路径
+    public static final String BLUEPRINT_FOLDER_PATH = "./schematics/uploaded/";//蓝图文件夹的路径
+    public static final String INVALID_BLUEPRINT_FOLDER_PATH = "./schematics/problem_schematic/";//蓝图文件夹的路径
     private final String BLOCK_PATH = "blocks.nbt.id";//设置方块的路径
+
+    public static void checkInvalidFolder() throws IOException {//判断非法蓝图的文件夹是否存在
+        File file = new File(INVALID_BLUEPRINT_FOLDER_PATH);
+        if (!file.exists()) {//判断问题蓝图文件夹是否存在
+            file.mkdirs();//不存在就创建一个文件夹
+        }
+    }
 
     private void createFilterFolderIfNotExist()//如果规则文件夹不存在,创建一个规则的文件夹
     {
@@ -72,7 +83,25 @@ public class Filter {//过滤器
             FileInputStream in = new FileInputStream(nbt_file);
             CompoundTag nbt_data = NbtIo.readCompressed(in);//读取 NBT 数据
 
-            return verifyNBTData(nbt_data);//返回 NBT 的校验结果
+            String[] data = blueprintId.split("/");
+
+
+            boolean res = verifyNBTData(nbt_data);
+            if (!res) {//判断蓝图数据是否合法
+                LOGGER.info(Msg.ANSI_RED + String.format("玩家 %s 上传了异常蓝图: %s", data[0], data[1], blueprintId) + Msg.ANSI_RESET);
+                File playerFolder = new File(INVALID_BLUEPRINT_FOLDER_PATH + data[0] + "/");
+                if (!playerFolder.exists())//判断存放玩家蓝图的文件夹是否存在
+                {
+                    playerFolder.mkdir();
+                }
+
+                Path targetPath = Paths.get(INVALID_BLUEPRINT_FOLDER_PATH + data[0] + "/").resolve(data[1]);//复制的目标路径
+                Path srcPath = Paths.get(BLUEPRINT_FOLDER_PATH + data[0] + "/").resolve(data[1]);//复制的源路径
+
+                Files.copy(srcPath, targetPath, StandardCopyOption.REPLACE_EXISTING);//复制问题文件
+
+            }
+            return res;
         } catch (IOException e) {
             LOGGER.info(Msg.ANSI_RED + "无法解析蓝图文件: " + nbt_file_path + Msg.ANSI_RESET);
             e.printStackTrace();
@@ -83,7 +112,6 @@ public class Filter {//过滤器
     public void CheckUpdate() throws IOException {//检查文件的版本是否更新了
         String latestVer = RuleUpdater.FetchVersion();//获取最新的文件的版本的信息
 
-        LOGGER.info("latest ver: " + latestVer + " current: " + originalRuleList.getVersion());
         if (!latestVer.equals(originalRuleList.getVersion()))//判断当前的规则的文件信息是否是最新的
         {
             LOGGER.info(Msg.ANSI_GREEN + "检测到有更新的规则文件,正在更新中..." + Msg.ANSI_RESET);
@@ -122,6 +150,8 @@ public class Filter {//过滤器
     }
 
     public void FullScan() throws Exception {//扫描用户上传的所有的文件
+        checkInvalidFolder();//判断无效的文件夹是否存在
+
         Map<String, Boolean> cache = new HashMap<String, Boolean>();//文件的哈希值的缓存
         int invalidCount = 0;//无效蓝图的计数
 
@@ -153,7 +183,6 @@ public class Filter {//过滤器
                 }
 
                 if (!isValid) {//判断用户的蓝图是否正常
-                    LOGGER.info(Msg.ANSI_RED + "玩家 " + file.getName() + " 上传了异常蓝图: " + playerFile.getName() + Msg.ANSI_RESET);
                     invalidCount++;
                 }
 

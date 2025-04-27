@@ -209,13 +209,13 @@ public class Rule {//规则
     public boolean IsBlueprintMatch(CompoundTag nbt_data)//判断蓝图数据是否匹配规则
     {
         try {
-            if (isJudgeTypeMatch(nbt_data)) {//TODO test
+//            if (isJudgeTypeMatch(nbt_data)) {//TODO test
 //                LOGGER.info(Msg.ANSI_GREEN + "蓝图判断匹配(是目标规则将要匹配的蓝图)" + Msg.ANSI_RESET);
-            }
+//            }
 
-            if (isRuleTypeMatch(nbt_data)) {//TODO test
+//            if (isRuleTypeMatch(nbt_data)) {//TODO test
 //                LOGGER.info(Msg.ANSI_GREEN + "蓝图过滤规则匹配" + Msg.ANSI_RESET);
-            }
+//            }
 
             return (isJudgeTypeMatch(nbt_data) && isRuleTypeMatch(nbt_data));//判断是否满足第一个判断条件和第二个判断条件
         } catch (Exception e) {

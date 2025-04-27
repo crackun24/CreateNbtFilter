@@ -7,7 +7,7 @@ import java.security.MessageDigest;
 import java.util.List;
 
 public class FilterUtil {
-    public static boolean IsValueNotInRange(List<Integer> list, int target)//TODO 判断一个值是不是不在范围里面
+    public static boolean IsValueNotInRange(List<Integer> list, int target)//判断一个值是不是不在范围里面
     {
         if (target < list.get(0) || target > list.get(1)) {
             return true;
@@ -15,7 +15,7 @@ public class FilterUtil {
         return false;
     }
 
-    public static boolean IsStringListContainTarget(List<String> list, String target)//TODO 判断一个字符串数组里面是否包含字符串
+    public static boolean IsStringListContainTarget(List<String> list, String target)// 判断一个字符串数组里面是否包含字符串
     {
         for (String temp : list) {
             if (temp.equals(target)) {

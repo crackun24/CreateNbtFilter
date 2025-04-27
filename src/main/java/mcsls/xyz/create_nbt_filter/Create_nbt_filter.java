@@ -2,6 +2,7 @@ package mcsls.xyz.create_nbt_filter;
 
 import com.mojang.logging.LogUtils;
 import mcsls.xyz.create_nbt_filter.commands.ScanAllUpload;
+import mcsls.xyz.create_nbt_filter.network.RuleUpdater;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -16,12 +17,13 @@ import org.slf4j.Logger;
 @Mod(Create_nbt_filter.MODID)
 public class Create_nbt_filter {
     public static final String MODID = "create_nbt_filter";
+    private RuleUpdater ruleUpdater;//规则文件更新对象
     private static final Logger LOGGER = LogUtils.getLogger();
     private Filter filter;//NBT 标签过滤器
 
     public Create_nbt_filter() {
-
         filter = new Filter();//创建一个新的过滤器
+        ruleUpdater = new RuleUpdater(filter);//规则更新对象
 
         try {
             filter.LoadAllRulesFromFile();//加载规则文件
@@ -39,6 +41,7 @@ public class Create_nbt_filter {
         modEventBus.addListener(this::commonSetup);
 
         MinecraftForge.EVENT_BUS.register(this);
+        ruleUpdater.start();//启动规则更新线程
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
