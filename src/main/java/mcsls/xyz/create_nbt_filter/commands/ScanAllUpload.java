@@ -19,7 +19,14 @@ public class ScanAllUpload {
                         commandContext -> {
                             if (commandContext.getSource().hasPermission(4)) {//判断是否有权限执行
                                 new Thread(() -> {
-                                    filter.FullScan();//异步执行扫描
+
+                                    try {
+                                        filter.FullScan();//异步执行扫描
+                                    }catch (Exception e)
+                                    {
+                                        e.printStackTrace();
+                                    }
+
                                 }).start();
                                 commandContext.getSource().sendSystemMessage(Component.literal("请到控制台查看执行结果"));
                             } else {

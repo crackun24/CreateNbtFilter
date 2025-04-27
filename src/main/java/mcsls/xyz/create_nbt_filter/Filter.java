@@ -17,7 +17,9 @@ import org.slf4j.Logger;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Filter {//过滤器
     private static final Logger LOGGER = LogUtils.getLogger();//获取日志记录器
@@ -119,7 +121,10 @@ public class Filter {//过滤器
         CheckUpdate();//检查配置文件的更新
     }
 
-    public void FullScan() {//扫描用户上传的所有的文件
+    public void FullScan() throws Exception {//扫描用户上传的所有的文件
+        Map<String, Boolean> cache = new HashMap<String, Boolean>();//文件的哈希值的缓存
+        int invalidCount = 0;//无效蓝图的计数
+
         File bluePrintFolder = new File(BLUEPRINT_FOLDER_PATH);
         long startTime = System.currentTimeMillis();
 
@@ -138,13 +143,24 @@ public class Filter {//过滤器
             }
 
             for (File playerFile : playerFileList) {//遍历这个玩家上传的所有的文件
-                if (!VerifyBlueprint(file.getName() + "/" + playerFile.getName())) {//判断用户文件校验是否成功
-                    LOGGER.info(Msg.ANSI_RED + "玩家 " + file.getName() + " 上传了异常蓝图: " + playerFile.getName() + Msg.ANSI_RESET);
+                boolean isValid = false;//是否是异常的蓝图
+                if (cache.containsKey(FilterUtil.CalculateHash(playerFile, "MD5")))//判断是否已经扫描过了
+                {
+                    isValid = cache.get(FilterUtil.CalculateHash(playerFile, "MD5"));
+                } else {
+                    isValid = VerifyBlueprint(file.getName() + "/" + playerFile.getName());
+                    cache.put(FilterUtil.CalculateHash(playerFile, "MD5"), isValid);//插入到缓存中
                 }
+
+                if (!isValid) {//判断用户的蓝图是否正常
+                    LOGGER.info(Msg.ANSI_RED + "玩家 " + file.getName() + " 上传了异常蓝图: " + playerFile.getName() + Msg.ANSI_RESET);
+                    invalidCount++;
+                }
+
             }
         }
 
-        LOGGER.info("扫描完成,用时: " + (System.currentTimeMillis() - startTime) + " ms");
+        LOGGER.info(String.format("扫描完成,用时 %d ms,总共 %d 份异常蓝图.", System.currentTimeMillis() - startTime, invalidCount));
     }
 
     public void ParseRuleFromOriginalRule(OriginalRule originalRule) {

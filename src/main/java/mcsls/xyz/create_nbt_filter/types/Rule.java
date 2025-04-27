@@ -5,7 +5,6 @@ import lombok.Data;
 import mcsls.xyz.create_nbt_filter.FilterUtil;
 import mcsls.xyz.create_nbt_filter.Msg;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import org.slf4j.Logger;
@@ -54,6 +53,11 @@ public class Rule {//规则
 //            LOGGER.info("original val: " + data.getAsString());//TODO test
 //            LOGGER.info(Msg.ANSI_BLUE + search_key + ":范围值的数据为:" + value + Msg.ANSI_RESET);//TODO test
 
+//            if (FilterUtil.IsValueNotInRange(range, value))//TODO test
+//            {
+//                LOGGER.info(Msg.ANSI_GREEN + "异常蓝图的值: " + value + " 范围的值: " + range.get(0) + " - " + range.get(1) + Msg.ANSI_RESET);
+//            }
+
             return FilterUtil.IsValueNotInRange(range, value);
         } else if (data.contains(search_key))//判断是否包含当前的标签
         {
@@ -75,9 +79,15 @@ public class Rule {//规则
         String search_key = nodes_list.get(search_index);
 //        LOGGER.info(Msg.ANSI_RED + "正在检测键: " + search_key + "索引: " + search_index + Msg.ANSI_RESET);//TODO test
 
-        if ((nodes_list.size() - 1) <= (search_index)) {//判断是否已经到了最后一个元素了
-            return true;//如果是最后的一个元素的话,直接返回
+        if ((nodes_list.size() - 1) <= (search_index)) {//判断是否已经到了最后一个元素了,并且最后一个元素和期望值匹配
+            if (data.contains(search_key))//判断最后一个元素和预期值是否相同
+            {
+                return true;
+            } else {//和预期值不相同
+                return false;
+            }
         }
+
         if (data.get(search_key) instanceof ListTag)//判断是否为数组
         {
 //            LOGGER.info(Msg.ANSI_RED + "搜索数组: " + search_key + Msg.ANSI_RESET);//TODO test

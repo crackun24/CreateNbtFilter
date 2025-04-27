@@ -1,10 +1,9 @@
 package mcsls.xyz.create_nbt_filter;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.MessageDigest;
 import java.util.List;
 
 public class FilterUtil {
@@ -49,5 +48,26 @@ public class FilterUtil {
         conn.disconnect();
 
         return res.toString();
+    }
+
+    public static String BytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b)); // 小写十六进制
+        }
+        return sb.toString();
+    }
+
+    public static String CalculateHash(File file, String algorithm) throws Exception {//计算一个文件的哈希值
+        MessageDigest digest = MessageDigest.getInstance(algorithm);
+        try (InputStream fis = new FileInputStream(file)) {
+            byte[] buffer = new byte[8192]; // 8KB缓冲
+            int bytesRead;
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                digest.update(buffer, 0, bytesRead);
+            }
+        }
+        byte[] hashBytes = digest.digest();
+        return BytesToHex(hashBytes);
     }
 }
