@@ -1,33 +1,41 @@
-name: Build and Release with ShadowJar
+name: Build and Replace Release with ShadowJar
 
 on:
   push:
     tags:
-      - 'v*'   
+      - 'v*'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up JDK
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'       
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x ./gradlew
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
 
-    - name: Build shadowJar
-      run: ./gradlew shadowJar
+      - name: Build shadowJar
+        run: ./gradlew shadowJar
 
-    - name: Upload release asset
-      uses: softprops/action-gh-release@v2
-      with:
-        files: build/libs/*.jar    
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Delete previous release (if exists)
+        run: |
+          TAG_NAME=${GITHUB_REF##*/}
+          echo "Deleting release with tag $TAG_NAME"
+          gh release delete "$TAG_NAME" -y || echo "No existing release to delete"
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+      - name: Create release and upload JAR
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/libs/*.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
