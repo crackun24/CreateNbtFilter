@@ -15,6 +15,7 @@ import net.minecraft.nbt.NbtIo;
 import org.slf4j.Logger;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -57,7 +58,7 @@ public class Filter {//过滤器
         if (!ruleFIle.exists()) { //判断规则文件是否存在
             String data = RuleUpdater.FetchRuleFile();//获取最新的配置文件信息
 
-            Files.writeString(ruleFIle.toPath(), data);//将配置文件的信息写出到配置文件中
+            Files.writeString(ruleFIle.toPath(), data, StandardCharsets.UTF_8);//将配置文件的信息写出到配置文件中
         }
     }
 

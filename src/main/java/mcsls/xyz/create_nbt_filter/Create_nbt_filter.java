@@ -37,6 +37,7 @@ public class Create_nbt_filter {
         } catch (Exception e) {
             LOGGER.info(Msg.ANSI_RED + "加载规则文件失败,没有任何规则被加载" + Msg.ANSI_RESET);
             e.printStackTrace();
+            return;
         }
 
         MinecraftForge.EVENT_BUS.register(new CheckBlueprint(filter));//注册蓝图上传事件的监听器
